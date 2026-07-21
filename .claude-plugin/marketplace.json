@@ -1,0 +1,15 @@
+{
+  "name": "plugin-figma-inspect",
+  "description": "Figma component discovery and implementation contract inspection.",
+  "owner": {
+    "name": "plugin-figma-inspect contributors"
+  },
+  "plugins": [
+    {
+      "name": "plugin-figma-inspect",
+      "source": ".",
+      "description": "Find Figma components across configured teams and inspect implementation-ready node contracts.",
+      "version": "0.1.0"
+    }
+  ]
+}

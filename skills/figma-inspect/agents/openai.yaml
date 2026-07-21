@@ -1,0 +1,4 @@
+interface:
+  display_name: "Figma Inspect"
+  short_description: "Find and inspect Figma components and layouts"
+  default_prompt: "Use Figma Inspect to find the relevant component and inspect its implementation contract."

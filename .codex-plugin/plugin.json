@@ -1,0 +1,19 @@
+{
+  "name": "plugin-figma-inspect",
+  "version": "0.1.0",
+  "description": "Find Figma components across configured teams and inspect implementation-ready node contracts.",
+  "license": "MIT",
+  "author": {
+    "name": "plugin-figma-inspect contributors"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Figma Inspect",
+    "shortDescription": "Find and inspect Figma components and layouts.",
+    "longDescription": "Figma Inspect searches persistent indexes across configured Figma teams, refreshes stale indexes on demand, and exports compact contracts for component sets, frames, and standalone components.",
+    "developerName": "plugin-figma-inspect contributors",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "defaultPrompt": "Find the relevant Figma component, refresh the index if it is stale, and inspect its implementation contract."
+  }
+}
