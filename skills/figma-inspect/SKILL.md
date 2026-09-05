@@ -1,6 +1,6 @@
 ---
 name: figma-inspect
-description: Find component sets and standalone components by name across configured Figma teams, inspect Figma nodes and component properties, and export compact implementation contracts. Use when a task references Figma, a Figma URL, a design-system component, visual specs, layouts, variants, or implementation from an existing design.
+description: Use when a task references Figma, a Figma URL, a design-system component, visual specs, layouts, variants, or implementation from an existing design. Find components by name across configured teams and export compact node or section contracts.
 ---
 
 # Figma Inspect
@@ -8,26 +8,19 @@ description: Find component sets and standalone components by name across config
 Use the installed `figma-inspect` CLI directly. The workflow is host-agnostic
 and has no nested-agent or MCP dependency.
 
-## Preflight
+## Runtime access
 
-Before the first API-backed operation in a session, verify the CLI and access:
+Use `figma-inspect` directly when it is installed and the environment is already
+prepared. Version `0.8.0` or newer is required. `FIGMA_API_TOKEN` provides access;
+`FIGMA_TEAMS` is needed for team discovery, not exports by URL. `FIGMA_INDEX_ROOT`
+is optional. Do not prepare credentials again when the host has provided them.
 
-```sh
-command -v figma-inspect
-figma-inspect --version
-figma-inspect --preflight --json
-```
-
-Version `0.7.0` or newer is required. If the executable is missing or older,
-ask the user to install or update it with:
-
-```sh
-npm install --global figma-inspect-cli@latest
-```
-
-The environment must provide `FIGMA_API_TOKEN` and normally `FIGMA_TEAMS`, a
-JSON object of user-defined aliases to team ids. `FIGMA_TEAM_ID` is supported
-as a legacy single-team fallback. `FIGMA_INDEX_ROOT` is optional.
+For a supplied Figma URL, start with the export below. If a command fails because
+of installation or access, diagnose with `command -v figma-inspect`,
+`figma-inspect --version`, and `figma-inspect --preflight --json`. For a known
+team, pass its configured alias to preflight. Do not check every team before
+inspecting a known URL. Missing or old installations need
+`npm install --global figma-inspect-cli@latest` through the host's normal setup.
 
 Do not print environment values or place the token on a command line. Preflight
 output is safe to report. A `failed` result means credentials or team access
@@ -62,20 +55,26 @@ the stale index only when it can still answer the request and state its age.
 
 ## Inspect or export a match
 
-Use a result URL directly. For raw node data:
+For a supplied URL or a search result, export a compact contract into the task's
+working directory. Use a separate directory for each source URL. No team
+selection is needed for URL exports.
 
 ```sh
-figma-inspect --inspect-file-node --url "<figma-url>" --json
-figma-inspect --inspect-component-set --url "<component-set-url>" --json
+figma-inspect --export-contract --output-dir ./figma-contract --url "<figma-url>"
 ```
 
-For implementation work, prefer a compact contract in a task-owned temporary
-directory. Pass the search result's team alias for component sets when more
-than one team is configured:
+For SECTION targets, read `section.index.yaml` first, then the child contracts
+relevant to the question. The complete source is in `section.source.json`;
+annotations and unsupported child types remain there and in the index. Screens
+with identical names have different node-ID directories. For a visual check or
+a requested image, add `--export-preview` (PNG by default); open the resulting
+image and share it through the host's ordinary file tools when requested.
+
+Use raw node output only when the contract does not represent information the
+task needs. Save it to a file before inspecting the relevant fields.
 
 ```sh
-output_dir=$(mktemp -d)
-figma-inspect --export-contract --output-dir "$output_dir" --team "<alias>" --url "<figma-url>"
+figma-inspect --inspect-file-node --url "<figma-url>" --json > ./figma-node.json
 ```
 
 `--variables <path>` is optional. Without it, contracts remain usable but

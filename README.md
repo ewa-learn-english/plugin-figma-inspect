@@ -7,7 +7,7 @@ host-agnostic and only invokes the separately installed CLI.
 ## Prerequisites
 
 - Node.js 24 or newer
-- `figma-inspect-cli` 0.7.0 or newer on `PATH`
+- `figma-inspect-cli` 0.8.0 or newer on `PATH`
 - A Figma personal access token with access to the configured teams
 
 ```sh
@@ -40,6 +40,20 @@ From this repository root:
 claude plugin marketplace add .
 claude plugin install plugin-figma-inspect@plugin-figma-inspect
 ```
+
+## Export a supplied URL
+
+```sh
+figma-inspect --export-contract --url "<figma-url>" --output-dir ./figma-contract
+```
+
+URL exports need only the token; they do not require team selection or an index
+refresh. SECTION exports provide an index, separate child contracts, and the
+complete original response. Add `--export-preview` for an image of the selected
+node. Use preflight to diagnose access failures rather than before every export.
+
+The shared `skills/figma-inspect` directory can also be consumed directly by a
+host that installs external skills and prepares its CLI environment.
 
 ## Indexes and search
 
