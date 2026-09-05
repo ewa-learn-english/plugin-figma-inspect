@@ -15,7 +15,7 @@ prepared. Version `0.8.0` or newer is required. `FIGMA_API_TOKEN` provides acces
 `FIGMA_TEAMS` is needed for team discovery, not exports by URL. `FIGMA_INDEX_ROOT`
 is optional. Do not prepare credentials again when the host has provided them.
 
-For a supplied Figma URL, start with the export below. If a command fails because
+For a supplied Figma URL, start with the inspection below. If a command fails because
 of installation or access, diagnose with `command -v figma-inspect`,
 `figma-inspect --version`, and `figma-inspect --preflight --json`. For a known
 team, pass its configured alias to preflight. Do not check every team before
@@ -55,35 +55,43 @@ the stale index only when it can still answer the request and state its age.
 
 ## Inspect or export a match
 
-For a supplied URL or a search result, export a compact contract into the task's
-working directory. Use a separate directory for each source URL. No team
-selection is needed for URL exports.
+For a supplied URL, skip index discovery. Choose the representation the task
+needs, and reuse the saved response for follow-up questions.
 
-```sh
-figma-inspect --export-contract --output-dir ./figma-contract --url "<figma-url>"
-```
-
-For SECTION targets, read `section.index.yaml` first, then the child contracts
-relevant to the question. The complete source is in `section.source.json`;
-annotations and unsupported child types remain there and in the index. Screens
-with identical names have different node-ID directories. For a visual check or
-a requested image, add `--export-preview` (PNG by default); open the resulting
-image and share it through the host's ordinary file tools when requested.
-
-Use raw node output only when the contract does not represent information the
-task needs. Save it to a file before inspecting the relevant fields.
+For a description or questions about structure, dimensions, colors, or
+typography, save the node response and query the requested fields with Python 3
+or Node.js JSON parsing. This includes actual values alongside variable bindings
+and the contents of every screen in a section. Keep the complete file; send only
+the fields relevant to the question to model context.
 
 ```sh
 figma-inspect --inspect-file-node --url "<figma-url>" --json > ./figma-node.json
 ```
 
-`--variables <path>` is optional. Without it, contracts remain usable but
-variable aliases are unresolved and the CLI prints a warning. Read the generated
-meta, geometry, visuals, structure DSL, and layout-risk files relevant to the
-task; do not dump raw Figma payloads into context when a contract is available.
+For implementation contracts or a section index, export into a task-owned
+directory. Use a separate directory for each source URL. URL exports need no
+team selection.
 
-If the user supplies a Figma URL, skip index discovery unless the URL is
-insufficient or related component search is requested.
+```sh
+figma-inspect --export-contract --output-dir ./figma-contract --url "<figma-url>"
+```
+
+Read `section.index.yaml` first for SECTION exports. It links to separate child
+contracts and `section.source.json`, the complete original response. Child
+contracts can be large for deeply nested screens; inspect the requested
+properties rather than concatenating every file. Python 3 or Node.js can query
+the JSON source directly, including annotations and actual typography values.
+Use child meta, geometry, visuals, structure DSL, and layout-risk files when
+implementing the selected screen or component.
+
+`--variables <path>` is optional. Without it, contracts preserve unresolved
+variable aliases and the CLI warns; use source values when the task needs
+actual numbers rather than token names.
+
+Add `--export-preview` when the user requests an image or the visual question
+cannot be resolved from node data. Open the resulting image and share it through
+the host's ordinary file tools when requested. A property overview normally needs
+only the structured data.
 
 ## Rules
 

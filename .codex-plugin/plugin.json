@@ -1,6 +1,6 @@
 {
   "name": "plugin-figma-inspect",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Find Figma components across configured teams and inspect implementation-ready node contracts.",
   "license": "MIT",
   "author": {
