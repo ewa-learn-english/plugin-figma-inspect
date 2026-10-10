@@ -11,7 +11,7 @@ and has no nested-agent or MCP dependency.
 ## Runtime access
 
 Use `figma-inspect` directly when it is installed and the environment is already
-prepared. Version `0.8.0` or newer is required. `FIGMA_API_TOKEN` provides access;
+prepared. Version `0.9.0` or newer is required. `FIGMA_API_TOKEN` provides access;
 `FIGMA_TEAMS` is needed for team discovery, not exports by URL. `FIGMA_INDEX_ROOT`
 is optional. Do not prepare credentials again when the host has provided them.
 
@@ -32,7 +32,8 @@ index operations may still be used.
 For name-based discovery, use the persistent indexes:
 
 1. Run `figma-inspect --index-status --json`.
-2. Refresh an index when it is missing or `ageSeconds` is greater than `86400`.
+2. Refresh an index when it is missing, has no `generatedAt`, or `ageSeconds`
+   is greater than `86400`.
 3. Search by the user's component name or the most specific known substring.
 4. Present ambiguous matches with their team, project, file, type, and URL
    before choosing one.
@@ -50,8 +51,20 @@ guess an id or invent aliases.
 
 Indexes live outside the plugin under `FIGMA_INDEX_ROOT`, defaulting to
 `~/.figma-inspect-cli/indexes`, so plugin and npm reinstalls do not erase them.
-There is no background refresh. If refresh fails but a stale index exists, use
-the stale index only when it can still answer the request and state its age.
+There is no background refresh.
+
+A refresh downloads only files changed since the last one and keeps every
+finished file if it is interrupted, so rerunning it continues the work. Figma
+rate-limits file downloads to roughly 10–20 per minute, so the first build of a
+large team can take tens of minutes: redirect its JSON and stderr progress to
+files and wait for the process instead of restarting it. Do not crawl Figma files with ad-hoc
+API scripts; they share the token's rate limit with the CLI.
+
+Exit status 1 with `failedFiles` or a team `error` means everything else was
+indexed; a failed file keeps its previous version and the next refresh retries
+it. Search the index, and report failed files or teams when they could hold the
+answer. If a refresh cannot run but an index
+exists, use it only when it can still answer the request and state its age.
 
 ## Inspect or export a match
 
@@ -88,6 +101,15 @@ implementing the selected screen or component.
 variable aliases and the CLI warns; use source values when the task needs
 actual numbers rather than token names.
 
+Node responses list the components their instances use in `components` and
+`componentSets`, keyed by node id. An entry with `remote: false` is defined in
+the same file, so inspect or export that node id there; when that node has no
+children, its main component was deleted and the instances in the design are the
+only source. A `remote: true` entry comes from a library; find its source with
+`--search-components`. Figma's published-component endpoints cover only
+published library components, so a `404` from them does not mean the component
+is missing.
+
 Add `--export-preview` when the user requests an image or the visual question
 cannot be resolved from node data. Open the resulting image and share it through
 the host's ordinary file tools when requested. A property overview normally needs
@@ -97,8 +119,8 @@ only the structured data.
 
 - Treat Figma as read-only; the CLI does not modify Figma documents.
 - Never expose `FIGMA_API_TOKEN` in output, logs, files, or error reports.
-- Do not refresh an index that is present and at most 24 hours old unless the
-  user explicitly requests fresh data.
+- Do not refresh a finished index that is at most 24 hours old unless a search
+  misses a component the request expects or the user requests fresh data.
 - Use `--team` only with a configured alias, never a raw team name guessed from
   natural language.
 - Report the selected Figma URL and any unresolved ambiguity with the result.

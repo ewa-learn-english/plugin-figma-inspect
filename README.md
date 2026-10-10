@@ -7,7 +7,7 @@ host-agnostic and only invokes the separately installed CLI.
 ## Prerequisites
 
 - Node.js 24 or newer
-- `figma-inspect-cli` 0.8.0 or newer on `PATH`
+- `figma-inspect-cli` 0.9.0 or newer on `PATH`
 - A Figma personal access token with access to the configured teams
 
 ```sh
@@ -75,8 +75,10 @@ figma-inspect --search-components --name "Button" --json
 
 One SQLite index is stored per team. Package/plugin reinstalls do not erase the
 indexes because they live under `FIGMA_INDEX_ROOT`, outside both installations.
-The plugin refreshes missing indexes and indexes older than 24 hours when a
-request needs them; it does not run a scheduler or background process.
+When a request needs an index that is missing, unfinished, or older than 24
+hours, the plugin refreshes it; it does not run a scheduler or background
+process. A refresh downloads only changed files, so it is cheap after the first
+build.
 
 Without `--team`, managed commands operate on all `FIGMA_TEAMS` entries. Use
 `--team <alias>` to narrow an operation to one configured team.
